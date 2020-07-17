@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 	if (argc != 2) {
 		err_quit("usage : a.out <pathname>");
 	}
-
+	printf("argv[1]=%s\n", argv[1]); 
 	if ((fp = fopen(argv[1], "r")) == NULL) {
 		err_sys("can’t open %s", argv[1]);
 	}
@@ -22,12 +22,14 @@ int main(int argc, char** argv) {
 		err_sys("pipe error");
 	}
 
-	if ((pid == fork()) < 0) {
+	if ((pid = fork()) < 0) {
 		err_sys("fork error");
 	} else if (pid > 0) {
 		close(fd[0]); /* close read end */
 		/* parent copies argv[1] to pipe */
+		int i = 0;
 		while (fgets(line, MAXLINE, fp) != NULL) {
+			printf("i = %d, line = %s", i++, line);
 			n = strlen(line);
 			if (write(fd[1], line, n) != n) {
 				err_sys("write error to pipe");
@@ -61,6 +63,8 @@ int main(int argc, char** argv) {
 		} else {
 			argv0 = pager;
 		}
+		printf("pager=%s\n", pager);
+		printf("argv0=%s\n", argv0);
 		if (execl(pager, argv0, (char*)0) < 0) {
 			err_sys("execl error for %s", pager);
 		}
